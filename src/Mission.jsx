@@ -7,7 +7,7 @@ class Mission extends Component {
 
 
     render() {
-        const { missionCatgory, missionCollection, allMissions, arrangeBy, setState } = this.props;
+        const { missionCatgory, missionCollection, allMissions, arrangeBy, setState, now_mission_state } = this.props;
         // console.log(missionCollection)
         return (
             <div className="mission_container">
@@ -20,6 +20,7 @@ class Mission extends Component {
                             missionCollection ={missionCollection[1]} 
                             arrangeBy={arrangeBy}
                             setState={setState}
+                            now_mission_state={now_mission_state}
                         />
                     : ''
                 }

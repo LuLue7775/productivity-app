@@ -7,14 +7,44 @@ class ModalTimer extends Component {
     constructor() {
         super();
         this.state = { 
-            time: { m:5, s:0}, 
-            seconds: 300,
+            time: { m:0, s:10 }, 
+            seconds: 10,
             startTime : null, // record timestamp  
-            isCounterStop : false,
+            isCounterStop : true,
+            isCounterPause : false,
+            
         };
         
       }
     
+    componentDidMount() {
+        const { seconds } = this.state;
+
+        this.setState({ time: this.secondsToTime(seconds) });
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        // if( !this.state.isCounterStop ) {
+
+        //     if( nextState.seconds !== this.state.seconds ||
+        //         nextState.isCounterPause !== this.state.isCounterPause 
+        //     ) {
+        //         this.setState({ time: this.secondsToTime( nextState.seconds )})
+        //         return true
+        //     }
+
+        // }
+        
+        // return false;
+        return true;
+    }
+    
+    exitMission = () => {
+        this.props.setState({ modal: null})
+    }
+    /**
+     * Formatting seconds to mins and secs for UI.
+     */
     secondsToTime(secs){
         let hours = Math.floor(secs / (60 * 60));
 
@@ -32,25 +62,31 @@ class ModalTimer extends Component {
         return obj;
     }
 
-    componentDidMount() {
-        const { seconds } = this.state;
-        console.log(this.state.isCounterStop)
+    /**
+     * To get time from WebAPI, storing into state. 
+     */
+    getTimerTime = () =>  { 
+        const { isCounterPause, seconds } = this.state;
 
-        this.setState({ time: this.secondsToTime(seconds) });
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-
-        if( nextState.seconds !== this.state.seconds ) {
-            this.setState({ time: this.secondsToTime( nextState.seconds )})
-            return true
+        if ( !isCounterPause ) {
+            this.setState(() => ({  
+                seconds:  10 - Math.floor((new Date() - this.state.startTime) / 1000)  // new time - timestamp
+            }));
         }
-        return false;
+
+        if ( seconds === 0 ) {
+            this.clearTimer();
+            
+        }
     }
-    
+
+    /**
+     * start timer when button's pressed, also keep getting time from WebAPI in 1sec interval.
+     * (rather than count with setInterval itselve) 
+     */
     startTimer = () => {
 
-        this.setState(()=>({
+        this.setState(() => ({
             isCounterStop: false,
             startTime: new Date()
         }))
@@ -60,48 +96,45 @@ class ModalTimer extends Component {
         }, 1000)
     }
 
-    getTimerTime = () =>  { 
-        if ( !this.state.isCounterStop ) {
-            this.setState(() => ({  
-                seconds:  300 - Math.floor((new Date() - this.state.startTime) / 1000)  // new time - timestamp
-            }));
-
-        }
+    pauseTimer = () => {
+        this.setState(()=>({ isCounterPause: true }))
     }
 
-    
-    pauseTimer = () => {
-        this.setState({
-            isCounterStop: !this.state.isCounterStop,
-        })
-        
+    resumeTimer = () => {
+        this.setState(()=>({ isCounterPause: false }))
     }
 
     clearTimer = () => {
-        this.setState({
-            time: { m:5, s:0}, 
-            seconds: 300,
+        this.setState(() => ({
+            time: { m:0, s:10 }, 
+            seconds: 10,
             startTime : null, // record timestamp  
             isCounterStop: true,
-
-        })
+            isCounterPause : false,
+        }))
     }
 
 
-
-
     render() {
-        console.log(this.state.isCounterStop)
+        const { isCounterPause, isCounterStop } = this.state;
+        const { allMissions, now_mission_state } = this.props;
+console.log(allMissions)
         return (
             <div className="modal_timer">
                 <h2> TIMER </h2>
                 <button onClick={ this.exitMission}> exit </button>
                 <div>
-                    <button onClick={this.startTimer}>Start</button>
+                { isCounterStop &&  <button onClick={this.startTimer}>Start</button> }
                     m: {this.state.time.m} s: {this.state.time.s}
                 </div>
-                <button onClick={this.clearTimer}>Reset</button>
-                <button onClick={this.pauseTimer}>Pause</button>
+                { isCounterPause  
+                ? <>
+                    <button onClick={this.clearTimer}>Reset</button> 
+                    <button onClick={this.resumeTimer}>Resume</button> 
+                  </>
+                : !isCounterStop && <button onClick={this.pauseTimer}>Pause</button>
+                }
+
 
             </div>
 

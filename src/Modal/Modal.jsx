@@ -4,25 +4,28 @@ import ModalTimer from "./ModalTimer";
 
 class Modal extends Component {
     
-    renderContent = (modal, setState) => {
+    renderContent = (state, setState) => {
+        const { modal, allMissions, now_mission_state } = state;
+console.log(allMissions)
         switch (modal){
             case 'timer':
-                return <ModalTimer setState={setState}/>
+                return <ModalTimer allMissions={allMissions} now_mission_state={now_mission_state} setState={setState}/>
             default:
                 return null;
         }
     }
 
     render() {
+
         return(
             <ModalContext.Consumer>
             {
                 ({ state, setState }) => {
-                    const { modal } = state;
-                    if (!modal) return null;
+                    
+                    if (!state.modal) return null;
                     return (
                         <div className="modal">
-                            <div className="modal_content"> { this.renderContent(modal, setState) } </div>
+                            <div className="modal_content"> { this.renderContent(state, setState) } </div>
                         </div>
                     )
                 }

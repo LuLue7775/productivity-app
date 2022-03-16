@@ -34,39 +34,51 @@ class MissionAdd extends Component {
     addMission = e => {
         e.preventDefault();
         const { text, tag } = this.state;
-        const { arrangeBy, missionCatgory } = this.props;
+        const { arrangeBy, missionCatgory, allMissions, missionCollection } = this.props;
 
-        if (arrangeBy === 'date') this.props.setState((state)=>
-            ({ allMissions:  [...state.allMissions, {name: text, tag:tag, mark:'undone', date:this.getFormattedDate(), id: new Date().toISOString() }] }) )
-        else if (arrangeBy === 'tag') this.props.setState((state)=>
-            ({ allMissions:  [...state.allMissions, {name: text, tag:missionCatgory, mark:'undone', date:this.getFormattedDate(), id: new Date().toISOString() }] }) )
+        if (arrangeBy === 'date') {
+            
+            this.props.setState(()=>
+                ({ allMissions:  [...allMissions, 
+                    {name: text, tag:tag, mark:'undone', date:this.getFormattedDate(), id: new Date().toISOString() }],
+ //     missionCollection should be updated? MissionDoneAndUndone depend on this.       
+                    missionCollection: [...missionCollection, {name: text, tag:tag, mark:'undone', date:this.getFormattedDate(), id: new Date().toISOString() }]         
+                }) 
+            )
+            // console.log(missionCollection)
+        }else if (arrangeBy === 'tag') this.props.setState(()=>
+            ({ allMissions:  [...allMissions, {name: text, tag:missionCatgory, mark:'undone', date:this.getFormattedDate(), id: new Date().toISOString() }] }) )
         
         this.setState({ text:''});
     }
 
     compareCollect = ( next, current ) => {
-        const result = next.filter((nextItem) => !current.find(currentItem => nextItem.name === currentItem.name )) 
+        const result = next.filter((nextItem) => !current.find(currentItem => nextItem.id === currentItem.id )) 
+    
         if (result.length) return true;
         return false;
     }
     
     shouldComponentUpdate(nextProps, nextState) {
-        const { missionCollection } = this.props;
+        const { missionCollection, allMissions } = this.props;
         const shouldUpdate =  this.compareCollect(nextProps.missionCollection, missionCollection ) ;
 
         if (nextState.text !== this.state.text){
             return true;
         } 
-        if ( shouldUpdate ) {
+        if ( shouldUpdate ) {            
             return true;
         }
         return false;
-
+        
     }
 
     render() {
         const { text, tag, tagOpts} = this.state;
-        const { arrangeBy, allMissions, missionCatgory } = this.props;
+        const { arrangeBy, allMissions, missionCatgory, missionCollection } = this.props;
+        // console.log(allMissions)
+
+        // console.log(missionCollection)
 
         return (  
         <form onSubmit={this.addMission}>
