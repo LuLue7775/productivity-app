@@ -1,6 +1,8 @@
 import  { Component } from "react";
+import { Container, Row, Col } from "react-bootstrap";
 import { MissionsContext } from "./context/context";
 import Mission from "./Mission";
+import MissionAdd from "./Mission/MissionAdd";
 
 
 class MissionPanel extends Component {
@@ -31,7 +33,6 @@ class MissionPanel extends Component {
             groupedMissions: filteredArr,
             prev_allMissions: mission_context.allMissions    
         })
-        // console.log(filteredArr)
     }
 
     componentDidMount() {
@@ -42,10 +43,8 @@ class MissionPanel extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         let mission_context = this.context.state;
-        // console.log([this.state.prev_allMissions, mission_context.allMissions])
 
-        if( this.state.prev_allMissions !== mission_context.allMissions 
-            ||
+        if( this.state.prev_allMissions !== mission_context.allMissions ||
              prevProps.arrangeBy !== this.props.arrangeBy
             ){
             this.renderContentWithFilter(mission_context.allMissions, mission_context.arrangeBy)
@@ -69,44 +68,47 @@ class MissionPanel extends Component {
     //    return true
     // }
 
-    add = () => {
-        const { allMissions } = this.context.state;
-
-        this.context.setState(()=>({ 
-            allMissions:  [...allMissions, 
-                {name: 'text', tag:'tag', mark:'undone', date:'2022/02/23', id: new Date().toISOString() }],
-        }))
-    }
-
     render() {
         const { groupedMissions, prev_allMissions } = this.state;
         const { allMissions } = this.context.state;
-        // console.log( allMissions)
-
 
         return(
             <MissionsContext.Consumer>
             {
                 ({ state, setState }) => {
-                    const { allMissions, arrangeBy, now_mission_state } = state;
+                    const { allMissions, arrangeBy, currentMissionIndex } = state;
                     if (!allMissions) return null;
                     return (
-                        <div className="mission_panel">
-                            <div className=""> 
-                            <button onClick={this.add}> ADD </button>
+                        <Container>
+                            { arrangeBy === 'date' &&
+                                <MissionAdd 
+                                allMissions={allMissions} 
+                                arrangeBy={arrangeBy} 
+                                setState={setState}/>
+                            }
 
+                            <Row xs={1} md={2} lg={3} className="g-4 my-4" >
+                                
                             { groupedMissions.map(missionCollection => { 
-                                // console.log(missionCollection)
-                                return <Mission key={missionCollection[0]} missionCatgory={missionCollection[0]} 
-                                    arrangeBy={arrangeBy} missionCollection={missionCollection} allMissions={allMissions} setState={setState}
-                                    now_mission_state={now_mission_state}
-                                    />
-                            })
-                            
-                            } 
+                                return (
+                                <Col className="mission_panel " key={missionCollection[0]} >
+                                    <Mission 
+                                        missionCollection={missionCollection} 
+                                        missionCatgory={missionCollection[0]} 
+                                        arrangeBy={arrangeBy} 
+                                        allMissions={allMissions} 
+                                        setState={setState}
+                                        currentMissionIndex={currentMissionIndex}
+                                        />
+                                </Col>
+                                )
 
-                            </div>
-                        </div>
+                            })
+
+                            } 
+                               
+                            </Row>
+                        </Container>
                     )
                 }
             }

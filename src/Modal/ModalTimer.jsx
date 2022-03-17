@@ -1,5 +1,5 @@
 import { Component } from "react";
-
+import { Badge, Modal, Button } from "react-bootstrap";
 import { TimerContext } from "../context/context";
 
 class ModalTimer extends Component {
@@ -7,41 +7,51 @@ class ModalTimer extends Component {
     constructor() {
         super();
         this.state = { 
+            
             time: { m:0, s:10 }, 
             seconds: 10,
             startTime : null, // record timestamp  
             isCounterStop : true,
-            isCounterPause : false,
-            
+            isCounterPause : false,            
         };
         
       }
+
+
     
     componentDidMount() {
         const { seconds } = this.state;
 
-        this.setState({ time: this.secondsToTime(seconds) });
+        this.setState(()=>({ 
+            time: this.secondsToTime(seconds),
+         }));
+
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        // if( !this.state.isCounterStop ) {
-
-        //     if( nextState.seconds !== this.state.seconds ||
-        //         nextState.isCounterPause !== this.state.isCounterPause 
-        //     ) {
-        //         this.setState({ time: this.secondsToTime( nextState.seconds )})
-        //         return true
-        //     }
-
-        // }
         
-        // return false;
-        return true;
+        if( !this.state.isCounterStop ) {
+
+            if( nextState.seconds !== this.state.seconds ||
+                nextState.isCounterPause !== this.state.isCounterPause 
+            ) {
+                this.setState({ time: this.secondsToTime( nextState.seconds )})
+                return true
+            }
+
+        }
+        
+        if( this.props.allMissions !== nextProps.allMissions ) {
+            return true
+        }
+
+        return false;
     }
     
     exitMission = () => {
         this.props.setState({ modal: null})
     }
+
     /**
      * Formatting seconds to mins and secs for UI.
      */
@@ -62,6 +72,20 @@ class ModalTimer extends Component {
         return obj;
     }
 
+    addToMissionTotalTime = () => {
+        const { allMissions, currentMissionIndex, setState } = this.props;
+
+        const newAllMissions = allMissions.map((mission, i) => {
+            if( i === currentMissionIndex ){ mission.timeSpan += 10 }
+            return mission
+        })
+
+        setState({
+            allMissions: newAllMissions
+        })
+    }
+    
+
     /**
      * To get time from WebAPI, storing into state. 
      */
@@ -76,7 +100,7 @@ class ModalTimer extends Component {
 
         if ( seconds === 0 ) {
             this.clearTimer();
-            
+            this.addToMissionTotalTime();
         }
     }
 
@@ -114,29 +138,77 @@ class ModalTimer extends Component {
         }))
     }
 
-
     render() {
         const { isCounterPause, isCounterStop } = this.state;
-        const { allMissions, now_mission_state } = this.props;
-console.log(allMissions)
+        const { allMissions, modal, currentMissionIndex } = this.props;
+
         return (
-            <div className="modal_timer">
-                <h2> TIMER </h2>
-                <button onClick={ this.exitMission}> exit </button>
-                <div>
-                { isCounterStop &&  <button onClick={this.startTimer}>Start</button> }
-                    m: {this.state.time.m} s: {this.state.time.s}
-                </div>
-                { isCounterPause  
-                ? <>
-                    <button onClick={this.clearTimer}>Reset</button> 
-                    <button onClick={this.resumeTimer}>Resume</button> 
-                  </>
-                : !isCounterStop && <button onClick={this.pauseTimer}>Pause</button>
-                }
+            
+            <Modal
+                show={modal ? true : false}
+                onHide={() => this.props.setState({modal: null}) }
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title id="contained-modal-title-vcenter">
+                        { allMissions[currentMissionIndex].name } 
+                    </Modal.Title>
+                    <Modal.Body>
+                    
+                    <Badge className='m-1' pill bg="info"> 
+                        {allMissions[currentMissionIndex].timeSpan}
+                    </Badge>
+                    
+                    <div>
+                    { isCounterStop &&  <Button onClick={this.startTimer}>Start</Button> }
+                        m: {this.state.time.m} s: {this.state.time.s}
+                    </div>
+
+                    { isCounterPause  
+                        ? 
+                        <>
+                            <Button onClick={this.clearTimer}> Reset </Button>
+                            <Button onClick={this.resumeTimer}> Resume </Button>
+                        </>
+                        : !isCounterStop && <Button onClick={this.pauseTimer}> Pause </Button>
+                    }
+
+                    </Modal.Body>
+                </Modal.Header>
+
+            </Modal>
 
 
-            </div>
+
+
+
+
+
+
+
+
+
+
+            // <div className="modal_timer">
+            //     <h2> TIMER </h2>
+            //     <h3> { thisMissionIndex!==null ? allMissions[thisMissionIndex].name : ''} </h3>
+            //     <span> {thisMissionIndex!==null ? allMissions[thisMissionIndex].timeSpan : ''} </span>
+
+            //     <button onClick={ this.exitMission}> exit </button>
+            //     <div>
+            //     { isCounterStop &&  <button onClick={this.startTimer}>Start</button> }
+            //         m: {this.state.time.m} s: {this.state.time.s}
+            //     </div>
+            //     { isCounterPause  
+            //     ? <>
+            //         <button onClick={this.clearTimer}>Reset</button> 
+            //         <button onClick={this.resumeTimer}>Resume</button> 
+            //       </>
+            //     : !isCounterStop && <button onClick={this.pauseTimer}>Pause</button>
+            //     }
+            // </div>
 
         )
     }
