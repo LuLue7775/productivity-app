@@ -1,9 +1,9 @@
 import { Component } from 'react';
+import Dashboard from './components/Dashboard';
 
 import { ModalContext, MissionsContext } from './context/context';
 import MissionPanel from './MissonPanel';
 import Modal from './Modal/Modal';
-import TagSelect from './TagSelect';
 
 class App extends Component {
 
@@ -54,10 +54,10 @@ class App extends Component {
       <ModalContext.Provider value={contextValue}>
         <MissionsContext.Provider value={contextValue}>
           <div className='app'>
-            <TagSelect arrangeBy={arrangeBy}/>
-            
+            <Dashboard/> 
             
             <MissionPanel arrangeBy={arrangeBy} />
+
             <Modal/>
           </div>
 

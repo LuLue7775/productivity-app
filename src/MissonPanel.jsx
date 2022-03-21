@@ -3,7 +3,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import { MissionsContext } from "./context/context";
 import Mission from "./Mission";
 import MissionAdd from "./Mission/MissionAdd";
-
+import Management from "./components/Management";
 
 class MissionPanel extends Component {
     
@@ -79,34 +79,30 @@ class MissionPanel extends Component {
                     const { allMissions, arrangeBy, currentMissionIndex } = state;
                     if (!allMissions) return null;
                     return (
-                        <Container>
-                            { arrangeBy === 'date' &&
-                                <MissionAdd 
+                        <Container className="mission-panel">
+
+                            <Management 
                                 allMissions={allMissions} 
                                 arrangeBy={arrangeBy} 
-                                setState={setState}/>
-                            }
+                                setState={setState}
+                            />
 
-                            <Row xs={1} md={2} lg={3} className="g-4 my-4" >
-                                
-                            { groupedMissions.map(missionCollection => { 
-                                return (
-                                <Col className="mission_panel " key={missionCollection[0]} >
-                                    <Mission 
-                                        missionCollection={missionCollection} 
-                                        missionCatgory={missionCollection[0]} 
-                                        arrangeBy={arrangeBy} 
-                                        allMissions={allMissions} 
-                                        setState={setState}
-                                        currentMissionIndex={currentMissionIndex}
-                                        />
-                                </Col>
-                                )
-
-                            })
-
-                            } 
-                               
+                            
+                            <Row xs={1} md={2} lg={3} className="g-4 my-4" >          
+                                { groupedMissions.map(missionCollection => { 
+                                    return (
+                                        <Col className="" key={missionCollection[0]} >
+                                            <Mission 
+                                                missionCollection={missionCollection} 
+                                                missionCatgory={missionCollection[0]} 
+                                                arrangeBy={arrangeBy} 
+                                                allMissions={allMissions} 
+                                                setState={setState}
+                                                currentMissionIndex={currentMissionIndex}
+                                                />
+                                        </Col>
+                                        ) })
+                                } 
                             </Row>
                         </Container>
                     )

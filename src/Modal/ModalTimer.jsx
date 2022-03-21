@@ -1,6 +1,7 @@
 import { Component } from "react";
 import { Badge, Modal, Button } from "react-bootstrap";
 import { TimerContext } from "../context/context";
+import Flip from "../components/Flip";
 
 class ModalTimer extends Component {
 
@@ -12,9 +13,10 @@ class ModalTimer extends Component {
             seconds: 10,
             startTime : null, // record timestamp  
             isCounterStop : true,
-            isCounterPause : false,            
+            isCounterPause : false,      
+            temp:10      
         };
-        
+        this.timer = null;
       }
 
 
@@ -29,7 +31,7 @@ class ModalTimer extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        
+        // console.log(this.state.isCounterStop)
         if( !this.state.isCounterStop ) {
 
             if( nextState.seconds !== this.state.seconds ||
@@ -48,14 +50,18 @@ class ModalTimer extends Component {
         return false;
     }
     
+    componentWillUnmount(){
+        clearInterval(this.timer); 
+    }
+
     exitMission = () => {
-        this.props.setState({ modal: null})
+        this.props.setState({ modal: null })
     }
 
     /**
      * Formatting seconds to mins and secs for UI.
      */
-    secondsToTime(secs){
+    secondsToTime = (secs) => {
         let hours = Math.floor(secs / (60 * 60));
 
         let divisor_for_minutes = secs % (60 * 60);
@@ -90,17 +96,23 @@ class ModalTimer extends Component {
      * To get time from WebAPI, storing into state. 
      */
     getTimerTime = () =>  { 
-        const { isCounterPause, seconds } = this.state;
-
-        if ( !isCounterPause ) {
-            this.setState(() => ({  
-                seconds:  10 - Math.floor((new Date() - this.state.startTime) / 1000)  // new time - timestamp
-            }));
+        const { isCounterPause, seconds, isCounterStop, startTime } = this.state;
+        if (isCounterStop) return
+        if (isCounterPause) {
+            // this.setState(() => ({
+            //     startTime: new Date()
+            // }))
+            return
         }
 
-        if ( seconds === 0 ) {
+        this.setState(() => ({  
+            seconds:  this.state.temp - Math.floor((new Date() - this.state.startTime) / 1000)  // new time - timestamp
+        }));
+    
+        if ( seconds <= 0 ) {
             this.clearTimer();
             this.addToMissionTotalTime();
+            return
         }
     }
 
@@ -109,32 +121,42 @@ class ModalTimer extends Component {
      * (rather than count with setInterval itselve) 
      */
     startTimer = () => {
+        const { isCounterPause } = this.state;
 
         this.setState(() => ({
             isCounterStop: false,
             startTime: new Date()
         }))
-
-        setInterval(() => {
-          this.getTimerTime()
+        this.timer = setInterval(() => {
+            this.getTimerTime()
         }, 1000)
+        
     }
 
     pauseTimer = () => {
-        this.setState(()=>({ isCounterPause: true }))
+        this.setState(()=>({ 
+            isCounterPause: true, 
+            temp: this.state.seconds 
+        }))
     }
 
     resumeTimer = () => {
-        this.setState(()=>({ isCounterPause: false }))
+        this.setState(()=>({ 
+            isCounterPause: false,
+            startTime: new Date() 
+        }))
     }
 
     clearTimer = () => {
+        clearInterval(this.timer); 
+
         this.setState(() => ({
             time: { m:0, s:10 }, 
             seconds: 10,
             startTime : null, // record timestamp  
             isCounterStop: true,
             isCounterPause : false,
+            temp: 10
         }))
     }
 
@@ -147,68 +169,34 @@ class ModalTimer extends Component {
             <Modal
                 show={modal ? true : false}
                 onHide={() => this.props.setState({modal: null}) }
-                size="lg"
                 aria-labelledby="contained-modal-title-vcenter"
+                size="lg"
                 centered
             >
                 <Modal.Header closeButton>
-                    <Modal.Title id="contained-modal-title-vcenter">
-                        { allMissions[currentMissionIndex].name } 
+                    <Modal.Title className="d-flex align-items-center" id="contained-modal-title-vcenter">
+                        <h4>{ allMissions[currentMissionIndex].name } </h4>
+                        <span className='mx-4 fs-6' > total spent:{` ${allMissions[currentMissionIndex].timeSpan}`} </span>
                     </Modal.Title>
-                    <Modal.Body>
-                    
-                    <Badge className='m-1' pill bg="info"> 
-                        {allMissions[currentMissionIndex].timeSpan}
-                    </Badge>
-                    
-                    <div>
-                    { isCounterStop &&  <Button onClick={this.startTimer}>Start</Button> }
-                        m: {this.state.time.m} s: {this.state.time.s}
-                    </div>
+                </Modal.Header>
 
+                <Modal.Body className="container">
+                    <Flip minutes={this.state.time.m} seconds={this.state.time.s} ></Flip>
+ 
+                    <div className="d-flex justify-content-center">
+
+                    { isCounterStop &&  <Button className="m-2" onClick={this.startTimer}>Start</Button> }
                     { isCounterPause  
                         ? 
                         <>
-                            <Button onClick={this.clearTimer}> Reset </Button>
-                            <Button onClick={this.resumeTimer}> Resume </Button>
+                            <Button className="m-2" onClick={this.clearTimer}> Reset </Button>
+                            <Button className="m-2" onClick={this.resumeTimer}> Resume </Button>
                         </>
                         : !isCounterStop && <Button onClick={this.pauseTimer}> Pause </Button>
                     }
-
-                    </Modal.Body>
-                </Modal.Header>
-
+                    </div>
+                </Modal.Body>
             </Modal>
-
-
-
-
-
-
-
-
-
-
-
-
-            // <div className="modal_timer">
-            //     <h2> TIMER </h2>
-            //     <h3> { thisMissionIndex!==null ? allMissions[thisMissionIndex].name : ''} </h3>
-            //     <span> {thisMissionIndex!==null ? allMissions[thisMissionIndex].timeSpan : ''} </span>
-
-            //     <button onClick={ this.exitMission}> exit </button>
-            //     <div>
-            //     { isCounterStop &&  <button onClick={this.startTimer}>Start</button> }
-            //         m: {this.state.time.m} s: {this.state.time.s}
-            //     </div>
-            //     { isCounterPause  
-            //     ? <>
-            //         <button onClick={this.clearTimer}>Reset</button> 
-            //         <button onClick={this.resumeTimer}>Resume</button> 
-            //       </>
-            //     : !isCounterStop && <button onClick={this.pauseTimer}>Pause</button>
-            //     }
-            // </div>
 
         )
     }

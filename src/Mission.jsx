@@ -65,7 +65,7 @@ class Mission extends Component {
 
         
         return ( 
-            <Card style={{ height:'400px', maxHeight: 'calc(100vh - 500px)',}}>
+            <Card className="mission-card" style={{ height:'400px'}}>
                 <Card.Header> { missionCollection[0] } </Card.Header>
                 <Card.Body className="overflow-auto">
                     <Tabs       

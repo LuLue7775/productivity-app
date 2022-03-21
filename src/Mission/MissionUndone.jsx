@@ -5,7 +5,8 @@ class MissionUndone extends Component {
     
     renderModal = e => {
         e.preventDefault();
-        const { allMissions }  = this.props.state
+        const { allMissions }  = this.props
+        
         let thisMission = e.target.value;
         const foundMissionIndex = allMissions.findIndex( mission => mission.id === thisMission )
 
@@ -19,7 +20,6 @@ class MissionUndone extends Component {
 
     render() {
         const { arrangeBy, undone } = this.props;
-
 
         return(
         <>

@@ -30,7 +30,7 @@ class Modal extends Component {
                     
                     return (
                         state.modal ?
-                        <div className="modal">
+                        <div className="modal ">
                             <div className="modal_content"> { this.renderContent(state, setState) } </div>
                         </div>
                         : ''
