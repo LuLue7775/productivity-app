@@ -8,6 +8,8 @@ In the future, AI models should be develped, in order to analyze users' tasks co
 Note: 
 * My motivation of building this app is to practice class component style as in React, as well as implementing with some JavaScript basics training. 
 
+![](https://media3.giphy.com/media/FIgJFfWmBEWUZ8iPtQ/giphy.webp)
+
 ![](https://media2.giphy.com/media/TGYOMeVaQAV1GOdAk8/giphy.webp)
 
 ## Overview of tech stack
